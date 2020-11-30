@@ -85,7 +85,7 @@ public class MainFenetre extends javax.swing.JFrame {
         } catch (ClassNotFoundException | SQLException ex) {
             Logger.getLogger(MainFenetre.class.getName()).log(Level.SEVERE, null, ex);
         }
-        alert("Si vous voulez changer de table, redemarrez le projet");
+       // alert("Si vous voulez changer de table, redemarrez le projet");
     }
     private void jButton1ActionPerformed(java.awt.event.ActionEvent  evt) {
         jLabel7.setText("");
@@ -100,40 +100,16 @@ public class MainFenetre extends javax.swing.JFrame {
             ResultSet rs = st.executeQuery(jTextArea1.getText());         
             //Retrieving the ResultSetMetaData object
             ResultSetMetaData rsmd = rs.getMetaData();
-            
-            //getting the column type
+              //getting the column number
             int column_count = rsmd.getColumnCount();
             //
             DefaultTableModel model = new DefaultTableModel();
-            System.out.println(rsmd.getColumnName(1));
-            for (int i = 0; i < column_count; i++) {
-                   // System.out.println("i = "+i);
-                    //System.out.println(rsmd.getColumnName(i+1));
-                    
-                    model.addColumn(rsmd.getColumnName(i+1));
+            //System.out.println(rsmd.getColumnName(1));
+            for (int i = 1; i <= column_count; i++) {
+                model.addColumn(rsmd.getColumnName(i));
             }
-            jTable1.setModel(model);
-            int i=1;
-            if(rs.next()){
-                System.out.println(column_count);
-                List list  = new ArrayList<>();
-               // System.out.println(column_count);
-                //columsName[j]=rs.getString(j);
-//              System.out.println(columsName[j]);
-                list.add(rs.getString(column_count));
-                System.out.println(list);
-                
-                //System.out.println(list);
-                column_count--;
-            }
-/*
-                            for (int j = 1; j <= rsmd.getColumnCount(); j++) {
-                //  System.out.println(j);
-                //columsName[j]=rs.getString(j);
-//              System.out.println(columsName[j]);
-                model.insertRow(j,(Object[])(Object)rs.getString(j));
-                }
-            */
+            jTable1.setModel(model);  
+           
             //admin
             //select * from auteurs;
             //                jTable1.
@@ -299,7 +275,7 @@ public class MainFenetre extends javax.swing.JFrame {
     private Connection con;
     private Statement st;
     public String dataSelected;
-    private Object[] columsName;
+    private Object columsName;
     ArrayList<DBName> databases = new ArrayList<>();
     ArrayList<DBName> tables = new ArrayList<>();
     // End of variables declaration                   
