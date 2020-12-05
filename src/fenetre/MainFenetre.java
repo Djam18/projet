@@ -10,15 +10,11 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
-
+import java.lang.Object;
 /**
  *
  * @author Djamal
@@ -34,7 +30,7 @@ public class MainFenetre extends javax.swing.JFrame {
         databases.clear();
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/projet1", "root", "");
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/projet1", "root", "bqHDRWZjvuJXA7OU");
             String sql = "select * from dbnames";
             st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
@@ -56,6 +52,9 @@ public class MainFenetre extends javax.swing.JFrame {
     public void alert(String msg, String title) {
         JOptionPane.showMessageDialog(rootPane, msg, title, JOptionPane.ERROR_MESSAGE);
     }
+    /*
+    select * from auteurs;
+    */
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt){
         String dataSelected = (String) jComboBox1.getSelectedItem();
         //alert(dataSelected);
@@ -63,7 +62,7 @@ public class MainFenetre extends javax.swing.JFrame {
         tables.clear();
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/"+dataSelected+"", "root", "");
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/"+dataSelected+"", "root", "bqHDRWZjvuJXA7OU");
             //Retrieving the data
               st = con.createStatement();
             ResultSet rs = st.executeQuery("Show tables");              
@@ -92,24 +91,50 @@ public class MainFenetre extends javax.swing.JFrame {
         //System.out.println("base"+(String)jComboBox1.getSelectedItem());
         try {           
             System.out.println(jTextArea1.getText());
-            //"SELECT * FROM auteurs;
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/"+(String)jComboBox1.getSelectedItem()+"", "root", "");
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/"+(String)jComboBox1.getSelectedItem()+"", "root", "bqHDRWZjvuJXA7OU");
             //Retrieving the data
             st = con.createStatement();            
-            ResultSet rs = st.executeQuery(jTextArea1.getText());         
             //Retrieving the ResultSetMetaData object
+            ResultSet rs = st.executeQuery(jTextArea1.getText()); 
             ResultSetMetaData rsmd = rs.getMetaData();
               //getting the column number
             int column_count = rsmd.getColumnCount();
-            //
+            String copie=rsmd.getTableName(column_count-1);
+            System.out.println(copie);
+            String sql1 = "SELECT COUNT(*) as total FROM "+copie+";";
+            ResultSet rs1=st.executeQuery(sql1);
+            while (rs1.next()) {                
+                totalLigne=rs1.getInt("total");
+            }
+            System.out.println(totalLigne);
             DefaultTableModel model = new DefaultTableModel();
             //System.out.println(rsmd.getColumnName(1));
             for (int i = 1; i <= column_count; i++) {
                 model.addColumn(rsmd.getColumnName(i));
             }
+
+            System.out.println("copie " + copie);
+            for (int i = 1; i <= totalLigne; i++) {
+                model.addRow(selectTest(i,copie,(String)jComboBox1.getSelectedItem(),column_count ));
+            }
+            
+            ArrayList<String[]> listRow = new ArrayList<>();
+            String[] row  = new String[column_count];
+            DefaultTableModel model1 = (DefaultTableModel) jTable1.getModel();
+            
+        /*    while(rs.next()){
+                for(int i = 1; i <= column_count; i++){
+                    row[i] = rs.getString(i);
+                }
+                listRow.add(row);
+            }
+            
+            System.err.println(listRow);
+        */  
+            //model.addRow(listRow);
+            
             jTable1.setModel(model);  
-           
             //admin
             //select * from auteurs;
             //                jTable1.
@@ -126,9 +151,40 @@ public class MainFenetre extends javax.swing.JFrame {
             //con.close();
         } catch (ClassNotFoundException | SQLException ex) {
             Logger.getLogger(MainFenetre.class.getName()).log(Level.SEVERE, null, ex);
-        }
-                
+        }                
     }
+    private Object[] selectTest (int id,String table,String db,int column){
+            ArrayList<Object[]> test = new ArrayList<>();
+            String select="SELECT * FROM "+table+" where id = "+id+";";
+            Object[] row = new Object[column];
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/"+db+"", "root", "bqHDRWZjvuJXA7OU");
+            //Retrieving the data
+              st = con.createStatement();
+            ResultSet rs = st.executeQuery(select);          
+            ResultSetMetaData md=rs.getMetaData();
+          //  Prendre les donnes par colonnnes dans la table
+            while (rs.next()) {
+                for(int x = 1; x < md.getColumnCount(); x = x+md.getColumnCount()){
+                    row[x] = rs.getObject(x) ;
+                    System.out.println(row[x]);
+//                    test.add(row);
+                }
+//                System.out.println(test);
+            }
+//            System.out.println(column_count);
+           // 
+            con.close();
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(MainFenetre.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        System.out.println("test  "+ test);
+        return row;
+    }
+//            while (rs.next()) {                
+//                ArrayList<Object[]> test = new ArrayList<>();
+  //          }
 
     private void initComponents() {
 
@@ -257,8 +313,44 @@ public class MainFenetre extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>                                         
-             
+         
+   /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(MainFenetre.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(MainFenetre.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(MainFenetre.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(MainFenetre.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new MainFenetre().setVisible(true);
+            }
+        });
+    }
+    
     // Variables declaration - do not modify                     
+    private int totalLigne;
     private javax.swing.JButton jButton1;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;

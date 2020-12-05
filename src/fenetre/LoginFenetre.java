@@ -108,7 +108,7 @@ public class LoginFenetre extends javax.swing.JFrame {
         String m_password=password;
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/projet1", "root", "");
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/projet1", "root", "bqHDRWZjvuJXA7OU");
             String sql = "SELECT * FROM `users` WHERE email = '"+m_email+"' and password ='"+m_password+ "'";
               //"select * from student where id_number='" + id + "'"
               // + "VALUES ('" + fname + "','" + lname + "','" + id + "')";
